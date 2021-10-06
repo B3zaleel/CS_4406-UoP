@@ -1,0 +1,29 @@
+html{
+  height: 100%;
+}
+body{
+  display: grid;
+  align-items: center;
+  margin: 10px;
+  width: calc(100% - 2 * 10px - 2 * 5%);
+  height: calc(100% - 2 * 10px - 2 * 5%);
+  padding: clamp(5px, 5%, 20px);
+  justify-content: center;
+}
+#container {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-items: center;
+  justify-content: center;
+  width: calc(80% + 2px);
+  height: calc(80% + 2px);
+  min-width: 300px;
+  min-height: 300px;
+}
+#container > canvas{
+  background: #686868;
+  border-radius: 10px;
+  border: 2px solid #686868;
+  cursor: pointer;
+}
