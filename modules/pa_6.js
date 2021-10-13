@@ -33,7 +33,7 @@ cameraObj.lookAt(new THREE.Vector3(0, 0, 0));
 cameraObj.rotateOnAxis(
   new THREE.Vector3(0.577, -0.577, -0.577),
   THREE.MathUtils.degToRad(120)
-);
+  );
 // add the camera to the scene
 scene.add(cameraObj);
 // set up the camera controls.  Please keep in mind that what this does is move the entire scene around.
@@ -44,7 +44,9 @@ cameraControls.addEventListener('mousemove', renderer);
 cameraControls.autoRotate = true;
 
 // attach the render-supplied DOM element
+// and change the background color to black
 container.append(renderer.domElement);
+container.getElementsByTagName('canvas')[0].style.background = '#000000';
 
 // #region The Light Source
 // create a point light
@@ -52,7 +54,7 @@ let light = new THREE.PointLight(0xffffff, 2.5, 1000);
 light.position.set(0, 1, 0);
 light.castShadow = true;
 // move the light backward along the z-axis
-light.position.z = 200;
+light.position.z = 280;
 light.lookAt(new THREE.Vector3(0, 0, 0));
 // rotate the light to be positioned on the right side of the scene
 light.rotateOnAxis(
@@ -98,29 +100,29 @@ const earthMesh = new THREE.Mesh(
     earthGeomParams.radius,
     earthGeomParams.segments,
     earthGeomParams.rings
-  ),
-  earthMaterial
-);
-// make the Earths's mesh shadow receivable but not castable
-earthMesh.castShadow = false;
-earthMesh.receiveShadow = true;
-// add the earthMesh to the earthObj object
-earthObj.add(earthMesh);
-// #endregion
+    ),
+    earthMaterial
+    );
+    // make the Earths's mesh shadow receivable but not castable
+    earthMesh.castShadow = false;
+    earthMesh.receiveShadow = true;
+    // add the earthMesh to the earthObj object
+    earthObj.add(earthMesh);
+    // #endregion
 
-// #region Moon Object
-// create a new sphere mesh to represent the Moon
-const moonObj = new THREE.Object3D();
-const moonMesh = new THREE.Mesh(
-  new THREE.SphereGeometry(
+    // #region Moon Object
+    // create a new sphere mesh to represent the Moon
+    const moonObj = new THREE.Object3D();
+    const moonMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(
     moonGeomParams.radius,
     moonGeomParams.segments,
     moonGeomParams.rings
   ),
   moonMaterial
-);
-// make the Moon's mesh shadow castable but not receivable
-moonMesh.castShadow = true;
+  );
+  // make the Moon's mesh shadow castable but not receivable
+  moonMesh.castShadow = true;
 moonMesh.receiveShadow = false;
 // move the moon away from the Earth's centre (Earth's radius + 30 pixels)
 moonObj.position.z = 40 + 30;
@@ -158,13 +160,13 @@ function animate() {
   earthObj.rotateOnWorldAxis(
     new THREE.Vector3(0, 1, 0),
     THREE.MathUtils.degToRad(earth_rot)
-  );
-  // The Moon's spinning
-  moonObj.rotateOnWorldAxis(
-    new THREE.Vector3(0, 1, 0),
-    THREE.MathUtils.degToRad(moon_rot)
-  );
-  // The Moon's orbit (using polar coordinates to translate the Moon)
+    );
+    // The Moon's spinning
+    moonObj.rotateOnWorldAxis(
+      new THREE.Vector3(0, 1, 0),
+      THREE.MathUtils.degToRad(moon_rot)
+      );
+      // The Moon's orbit (using polar coordinates to translate the Moon)
   moonObj.position.x = -rad * Math.cos(THREE.MathUtils.degToRad(phi));
   moonObj.position.z = rad * Math.sin(THREE.MathUtils.degToRad(phi));
   phi += (phi_eps / fps) % 360;
