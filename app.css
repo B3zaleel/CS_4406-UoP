@@ -2,7 +2,7 @@ html{
   height: 100%;
 }
 body{
-  display: grid;
+  display: flex;
   align-items: center;
   margin: 10px;
   width: calc(100% - 2 * 10px - 2 * 5%);
@@ -16,8 +16,8 @@ body{
   align-content: center;
   justify-items: center;
   justify-content: center;
-  width: calc(80% + 2px);
-  height: calc(80% + 2px);
+  width: calc(90% + 2px);
+  height: calc(90% + 2px);
   min-width: 300px;
   min-height: 300px;
 }
