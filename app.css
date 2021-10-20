@@ -20,6 +20,7 @@ body{
   height: calc(90% + 2px);
   min-width: 300px;
   min-height: 300px;
+  outline: none;
 }
 #container > canvas{
   background: #686868;
@@ -27,3 +28,79 @@ body{
   border: 2px solid #686868;
   cursor: pointer;
 }
+
+/* #region Math function input */
+input[type="text"],
+input[type="email"]{
+  padding: 2px 5px;
+  height: 18px;
+  width: 80px;
+  border: 2px solid hsl(0, 0%, 40%);
+  border-radius: 5px;
+  color: hsl(0, 0%, 40%);
+  background: hsl(0, 0%, 20%);
+  outline: none;
+  transition-property: background;
+  transition-delay: 200ms;
+  transition-duration: 750ms;
+  transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input:focus{
+  color: hsl(0, 0%, 0%);
+  background: hsl(0, 0%, 100%);
+}
+
+.utils-section > div{
+  padding: 10px;
+}
+
+.fxn-input{
+  display: none;
+  border: 1px solid #808080;
+  background: #d6d6d6;
+  border-radius: 10px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.fxn-input > b{
+  font-size: 16px;
+}
+
+.fxn-input > div{
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  grid-auto-flow: column;
+  column-gap: 5px;
+  white-space: nowrap;
+}
+
+.fxn-input button {
+  display: inline-flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  margin: 5px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 2px solid;
+  background: hsl(0, 0%, 80%);
+  cursor: pointer;
+}
+
+.fxn-input button:hover {
+  background: radial-gradient(
+    hsl(0, 0%, 60%),
+    hsl(0, 0%, 80%)
+  );
+}
+
+.fxn-input button:active{
+  padding: 2px;
+  margin: 7px;
+}
+/* #endregion */
