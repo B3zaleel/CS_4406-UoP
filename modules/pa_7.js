@@ -23,6 +23,12 @@ const setObjectPosition = (obj, pos)=> {
   }
 };
 
+/**
+ * Substitutes the variables in a function with their given values.
+ * @param {String} func_expr The expresion to modify.
+ * @param {Number} x The value of the x variable.
+ * @param {Number} y The value of the y variable.
+ */
 const preprocess_fxn = (func_expr, x, y)=> {
   // checks if a character is a number
   const is_number = char=> (char != null) && ((char.charCodeAt(0) >= 48) && (char.charCodeAt(0) <= 57));
@@ -34,6 +40,7 @@ const preprocess_fxn = (func_expr, x, y)=> {
   let prev_char = null, next_char = null;
 
   for (let i = 0; i < func_expr.length; i++) {
+    // skip whitespaces
     while ((func_expr[i] == " ") && (i < func_expr.length)) {
       i++;
     }
@@ -61,7 +68,23 @@ const preprocess_fxn = (func_expr, x, y)=> {
     }
   }
   return buffer.join("");
-}
+};
+
+/**
+ * Resolves a factor to its actual value in a range.
+ * @param {Number} factor
+ * @param {Number} min
+ * @param {Number} max
+ * @returns
+ */
+const resolveToRange = (factor, min, max)=> {
+  // compute the span of the range of values
+  const span = max - min;
+  // compute the proportion of the span and add to
+  // the minimum position or subtract from the maximum position.
+  // reason: (no position can be smaller than the mimimum or greater than the maximum)
+  return (min + (factor * span)); // or max - (factor * spans)
+};
 // #endregion
 
 // get the required DOM elements
@@ -89,9 +112,13 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 let scene = new THREE.Scene();
 // create the camera for viewing the scene and add it to an Object3D object
 const cameraObj = new THREE.Object3D();
-const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+let camera;
+camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+// camera = new THREE.OrthographicCamera(WIDTH / -2, WIDTH / 2, HEIGHT / 2, HEIGHT / -2, NEAR, FAR);
 cameraObj.add(camera);
 cameraObj.name = "camera";
+camera.position.set(0, 0, 0);
+cameraObj.position.set(0, 0, 0);
 // add the camera to the scene
 scene.add(cameraObj);
 // set up the camera controls.  Please keep in mind that what this does is move the entire scene around.
@@ -99,6 +126,7 @@ scene.add(cameraObj);
 // the scene doesn't change so the lighting on the surface of the object(s) will not change either
 let cameraControls = new OrbitControls(camera, renderer.domElement);
 cameraControls.addEventListener("mousemove", renderer);
+cameraControls.enablePan = true;
 cameraControls.autoRotate = false;
 
 // attach the render-supplied DOM element
@@ -167,12 +195,103 @@ const Graph_Funcs = {
     return {x, y, z};
   },
   /**
-   * Computes the points for a cone mesh.
+   * Computes the points for a hyperbolic paraboloid mesh.
+   * @see http://amdg.freeshell.org/ENCE202/MATLAB/images.html
    */
   hyperbolic_paraboloid: (u, v)=> {
-    const x = u;
-    const y = v;
+    const a = -6;
+    const b = 6;
+    const x = resolveToRange(u, a, b);
+    const y = resolveToRange(v, a, b);
     const z = (x ** 2) - (y ** 2);
+    return {x, y, z};
+  },
+  /**
+   * Computes the points for an elliptical paraboloid mesh.
+   * @see http://amdg.freeshell.org/ENCE202/MATLAB/images.html
+   */
+  elliptical_paraboloid_0: (u, v)=> {
+    const a = -6;
+    const b = 6;
+    const x = resolveToRange(u, a, b);
+    const y = resolveToRange(v, a, b);
+    const z = ((x ** 2) + (y ** 2))/-2;
+    return {x, y, z};
+  },
+  /**
+   * Computes the points for a paraboloid mesh.
+   * @see http://amdg.freeshell.org/ENCE202/MATLAB/images.html
+   */
+  paraboloid_0: (u, v)=> {
+    const a = -6;
+    const b = 6;
+    const x = resolveToRange(u, a, b);
+    const y = resolveToRange(v, a, b);
+    const z = Math.sqrt((x ** 2) + (y ** 2) + 1);
+    return {x, y, z};
+  },
+  /**
+   * Computes the points for a paraboloid mesh.
+   * @see http://amdg.freeshell.org/ENCE202/MATLAB/images.html
+   */
+  paraboloid_1: (u, v)=> {
+    const a = -6;
+    const b = 6;
+    const x = resolveToRange(u, a, b);
+    const y = resolveToRange(v, a, b);
+    const z = Math.abs(x) + Math.abs(y);
+    return {x, y, z};
+  },
+  /**
+   * Computes the points for a Steiner surface mesh.
+   * @see http://paulbourke.net/geometry/steiner/
+   */
+  steiner_surface: (u, v)=> {
+    const a = resolveToRange(u, 0, Math.PI);
+    const b = resolveToRange(v, 0, Math.PI);
+    const scale = 30;
+    const x = scale * (Math.cos(b) * Math.cos(b)*Math.sin(2 * a) / 2);
+    const y = scale * (Math.sin(a) * Math.sin(2* b) / 2);
+    const z = scale * (Math.cos(a) * Math.sin(2 * b) / 2);
+    return {x, y, z};
+  },
+  /**
+   * Computes the points for a Stiletto surface mesh.
+   * @see http://paulbourke.net/geometry/stiletto/
+   */
+  stiletto_surface: (u, v)=> {
+    const a = resolveToRange(u, 0, 2 * Math.PI);
+    const b = resolveToRange(v, 0, 2 * Math.PI);
+    const scale = 30;
+    const x = scale * ((2 + Math.cos(a)) * ((Math.cos(b) ** 3) * Math.sin(b)));
+    const y = scale * ((2 + Math.cos(a + ((Math.PI * 2) / 3))) * ((Math.cos(b + ((Math.PI * 2) / 3)) ** 2) * (Math.sin(b + ((Math.PI * 2) / 3))**2)));
+    const z = scale * ((2 + Math.cos(a - ((Math.PI * 2) / 3))) * ((Math.cos(b + ((Math.PI * 2) / 3)) ** 2) * (Math.sin(b + ((Math.PI * 2) / 3))**2)));
+    return {x, y, z};
+  },
+  /**
+   * Computes the points for a Stear drop mesh.
+   * @see http://paulbourke.net/geometry/teardrop/
+   */
+  tear_drop_0: (u, v)=> {
+    const a = resolveToRange(u, 0, 2 * Math.PI);
+    const b = resolveToRange(v, 0, Math.PI);
+    const scale = 20;
+    const x = scale * (0.5 * (1 - Math.cos(b)) * Math.sin(b) * Math.cos(a));
+    const y = scale * (0.5 * (1 - Math.cos(b)) * Math.sin(b) * Math.sin(a));
+    const z = scale * (Math.cos(b));
+    return {x, y, z};
+  },
+  /**
+   * Computes the points for a cross cap mesh.
+   * @see http://paulbourke.net/geometry/crosscap/
+   */
+  cross_cap: (u, v)=> {
+    const a = resolveToRange(u, 0, 2 * Math.PI);
+    const b = resolveToRange(v, 0, Math.PI / 2);
+    const scale = 20;
+    const x = scale * (Math.cos(a) * Math.sin(2 * b));
+    const y = scale * (Math.sin(a) * Math.sin(2 * b));
+    const z = scale * (Math.cos(b) * Math.cos(b) - Math.cos(a) * Math.cos(a) * Math.sin(b) * Math.sin(b));
     return {x, y, z};
   },
   /**
@@ -188,33 +307,36 @@ const Graph_Funcs = {
     return {x, y, z};
   },
   /**
+   * Computes the points in a Kuen surface.
+   * @see http://paulbourke.net/geometry/kuen/
+   */
+  kuen_surface: (u, v)=> {
+    const s = resolveToRange(u, -4.5, 4.5);
+    const t = resolveToRange(v, 0, Math.PI);
+    const x = (2 * (Math.cos(s) + (s * Math.sin(s))) * Math.sin(t)) / (1 + ((s**2) * (Math.sin(t)**2)));
+    const y = (2 * (Math.sin(s) - (s * Math.cos(s))) * Math.sin(t)) / (1 + ((s**2) * (Math.sin(t)**2)));
+    const z = (Math.log(Math.tan(t / 2))) + (2 * Math.cos(t)) / (1 + ((s**2) * (Math.sin(t)**2)));
+    return {x, y, z};
+  },
+  /**
    * Computes the points for a custom graph function.
    */
   custom: (u, v)=> {
     // u and v are fractions, therefore resolve the fractions
     // to our graph's range and domain
-    // compute the spans of the function's x and y axes values
-    const spans = {
-      x: (Max_X - Min_X),
-      y: (Max_Y - Min_Y),
-    };
-    const signs = {
-      x: u < 0.5 ? -1 : 1,
-      y: v < 0.5 ? -1 : 1,
-    };
-    // compute the proportion of the x and y axes spans and add to
-    // the minimum position or subtract from the maximum position.
-    // reason: (no position can be smaller than the mimimum or greater than the maximum)
-    const x = (Min_X + (u * spans.x)); // or x = Max_X - (u * spans.x)
-    const y = (Min_Y + (v * spans.y)); // or y = Max_Y - (v * spans.y)
+    const x = resolveToRange(u, Min_X, Max_X);
+    const y = resolveToRange(v, Min_Y, Max_Y);
     const proccessed_func = preprocess_fxn(Custom_Func, x, y);
     try {
       const z = mexp.eval(proccessed_func);
       console.log(proccessed_func, "x = ", x, "y = ", y, "z = ", z);
       Graph_Pos = {x: 0, y: 0, z: 0};
-      return {x, y, z};
+      fxnInput.title = "";
+      fxnInput.classList.remove("error");
+      return {x: x, y: y, z: z};
     } catch (Exception) {
-      // alert("Invalid expression");
+      fxnInput.title = "Invalid expression";
+      fxnInput.classList.add("error");
       return {x: 0, y: 0, z: 0};
     }
   },
@@ -233,8 +355,8 @@ const generate_points = graph_func=> {
 
 // create the material for the graph
 const graphMaterial = new THREE.MeshBasicMaterial({
-  color: 0x2213ff,
-  side: THREE.DoubleSide
+  color: 0x13dcff,
+  side: THREE.DoubleSide,
 });
 // Parametic geometry generates a surface inside a 3D box using vertical (stacks)
 // and horizontal (slices) divisions that correspond to a point on the surface.
@@ -256,22 +378,24 @@ const graphObj = new THREE.Object3D();
 graphObj.name = "graph";
 scene.add(graphObj);
 
+/**
+ * Resets the camera's position
+ * @param {String} name The name of the graph being plotted.
+ */
 const resetCameraPosition = name=> {
   cameraControls.reset();
   if (name == "custom") {
-    camera.position.x = 0;
-    camera.position.y = 0;
-    camera.position.z = 150;
+    camera.position.z = 50;
     cameraObj.lookAt(new THREE.Vector3(0, 0, 0));
     // rotate the camera so that the scene looks like a 2D graph
     cameraObj.rotateX(THREE.MathUtils.degToRad(90));
-    // cameraObj.rotateY(THREE.MathUtils.degToRad(0));
   } else {
-    camera.position.z = 150;
+    camera.position.z = 1 << 7;
     cameraObj.lookAt(new THREE.Vector3(0, 0, 0));
     // rotate the camera so that the scene looks 3D
-    cameraObj.rotateX(THREE.MathUtils.degToRad(-40));
+    cameraObj.rotateX(THREE.MathUtils.degToRad(-60));
   }
+  cameraControls.update();
 };
 
 /**
@@ -377,8 +501,6 @@ fxnSubmit.onclick = ()=> {
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
-  // console.log("camera position", Camera_Default_Pos);
-  // console.log("camera obj position", CameraObj_Default_Pos);
 }
 
 // render a cone's graph DEFAULT_FXN

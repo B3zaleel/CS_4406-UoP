@@ -2,13 +2,24 @@ html{
   height: 100%;
 }
 body{
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  column-gap: 5px;
+  row-gap: 0;
   align-items: center;
   margin: 10px;
   width: calc(100% - 2 * 10px - 2 * 5%);
   height: calc(100% - 2 * 10px - 2 * 5%);
   padding: clamp(5px, 5%, 20px);
   justify-content: center;
+}
+
+@media (max-width: 560px) {
+  body{
+    grid-auto-flow: row;
+    row-gap: 5px;
+    column-gap: 0;
+  }
 }
 #container {
   display: flex;
@@ -51,6 +62,21 @@ input[type="email"]:focus,
 input:focus{
   color: hsl(0, 0%, 0%);
   background: hsl(0, 0%, 100%);
+}
+
+input[type="text"].error,
+input[type="email"].error,
+input.error{
+  border-color:  red;
+  color: pink;
+}
+
+input[type="text"].error:focus,
+input[type="email"].error:focus,
+input.error{
+  border-color:  red;
+  color: hsl(0, 0%, 0%);
+  color: #13dcff
 }
 
 .utils-section > div{
